@@ -4,7 +4,10 @@ using UnityEngine;
 public class SOHub : ScriptableObject
 {
     internal MainUpdateGateway MainUpdateGateway;
+    internal MapController MapController;
     internal ComplantView ComplantView;
+    internal ComplantSubmit ComplantSubmit;
+    internal DonePopup DonePopup;
     internal ComplantDTO[] ComplantDTOArr;
 
 }

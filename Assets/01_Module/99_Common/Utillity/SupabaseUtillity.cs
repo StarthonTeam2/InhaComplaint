@@ -1,12 +1,22 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class SupabaseUtillity
 {
     static string url = "https://kbhymsvfrtdrhpqvtecp.supabase.co";
     static string key = "sb_publishable_oDMNfSjNZIUUTXMaFg_gaA_9e9WGs2P";
+
+    static SOHub _sOHub;
+    static Action _callback;
+
+    static int _done, _hurdle;
+    static Dictionary<int, ComplantDTO> _complantDTODict = new Dictionary<int, ComplantDTO>();
 
     internal static async Awaitable UploadRDBRow(ComplantRDBDTO dTO)
     {
@@ -32,12 +42,24 @@ public class SupabaseUtillity
         }
     }
     
-    internal static async Awaitable ImageUpload(Texture2D texture, string extension, Action<string> callback)
+    internal static async Awaitable ImageUpload(string fullpath, Action<string> callback)
     {
+        string extension = Path.GetExtension(fullpath);
         string filename = $"{Guid.NewGuid()}{extension}";
         using UnityWebRequest www = UnityWebRequest.Post(url + $"/storage/v1/object/images/{filename}", new WWWForm());
-        www.uploadHandler = new UploadHandlerRaw(texture.EncodeToPNG());
-        www.SetRequestHeader("Content-Type", "image/png");
+        byte[] data;
+        string contentType;
+        data = File.ReadAllBytes(fullpath);
+        if (extension.ToLower().Contains("jpg"))
+        {
+            contentType = "image/jpg";
+        }
+        else
+        {
+            contentType = "image/png";
+        }
+        www.uploadHandler = new UploadHandlerRaw(data);
+        www.SetRequestHeader("Content-Type", contentType);
         www.SetRequestHeader("apikey", key);
         await www.SendWebRequest();
         if (www.result == UnityWebRequest.Result.Success)
@@ -81,6 +103,51 @@ public class SupabaseUtillity
         else
         {
             callback?.Invoke(null, id, isDoneImg);
+        }
+    }
+
+    internal static void SettingData(string json, SOHub sOHub, Action callback)
+    {
+        _sOHub = sOHub;
+        _callback = callback;
+
+        ComplantRDBDTOGroup complantDTOGroup = JsonUtility.FromJson<ComplantRDBDTOGroup>($"{{\"dtoArr\":{json}}}");
+        _done = 0; _hurdle = 0;
+        for (int i = 0; i < complantDTOGroup.dtoArr.Length; i++)
+        {
+            if (!_complantDTODict.ContainsKey(complantDTOGroup.dtoArr[i].id))
+            {
+                DownloadImg(complantDTOGroup.dtoArr[i]);
+            }
+        }
+    }
+
+    static void DownloadImg(ComplantRDBDTO dto)
+    {
+        _hurdle += dto.done ? 2 : 1;
+        _complantDTODict[dto.id] = new ComplantDTO(dto);
+        ImageDownload(dto.img_link, DownloadDone, dto.id, false).Cancel();
+        if (dto.done)
+        {
+            ImageDownload(dto.done_img_link, DownloadDone, dto.id, true).Cancel();
+        }
+    }
+
+    static void DownloadDone(Texture tex, int id, bool isDoneImg)
+    {
+        if (isDoneImg)
+        {
+            _complantDTODict[id].doneImg = tex;
+        }
+        else
+        {
+            _complantDTODict[id].img = tex;
+        }
+        _done++;
+        if (_done == _hurdle)
+        {
+            _sOHub.ComplantDTOArr = _complantDTODict.Select(pair => pair.Value).ToArray();
+            _callback?.Invoke();
         }
     }
 }

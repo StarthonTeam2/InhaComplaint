@@ -27,7 +27,7 @@ public class MapController : MonoBehaviour, IUpdate
         _mainInput = new MainInput();
         _mainInput.Enable();
         LocationInfo locationData = Input.location.lastData;
-        _lastPos = new Vector2(126.6580320932838f, 37.451520869041815f/*locationData.latitude, locationData.longitude*/);//위도 위치로
+        _lastPos = new Vector2(126.65681847046667f, 37.44876251465213f/*locationData.longitude, locationData.latitude*/);//위도 위치로
 
         for (int i = 0; i < _sOHub.ComplantDTOArr.Length; i++)
         {
@@ -40,9 +40,29 @@ public class MapController : MonoBehaviour, IUpdate
         UpdateMap();
     }
 
+    internal void Resetting(float lat, float lon)
+    {
+        _lastPos = new Vector2(lon, lat);
+
+        for (int i = 0; i < _markerList.Count; i++)
+        {
+            Destroy(_markerList[i].gameObject);
+        }
+        _markerList.Clear();
+
+        for (int i = 0; i < _sOHub.ComplantDTOArr.Length; i++)
+        {
+            Marker curMarker = Instantiate(_markerPrefab, _markerRoot);
+            curMarker.transform.localScale = Vector3.one;
+            curMarker.Init(_sOHub.ComplantDTOArr[i]);
+            _markerList.Add(curMarker);
+        }
+        UpdateMap();
+    }
+
     void IUpdate.Update()
     {
-        if (_sOHub.ComplantView.IsOn) { return; }
+        if (_sOHub.ComplantView.IsOn || _sOHub.ComplantSubmit.IsOn) { return; }
 
         _touch0 = _mainInput.Pointer.Touch0.ReadValue<TouchState>();
         _touch1 = _mainInput.Pointer.Touch1.ReadValue<TouchState>();

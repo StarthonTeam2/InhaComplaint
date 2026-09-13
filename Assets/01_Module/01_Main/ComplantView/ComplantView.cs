@@ -35,16 +35,16 @@ public class ComplantView : MonoBehaviour
     {
         _animator.SetTrigger("Show");
         _isOn = true;
-        float ratio = dTO.img.height / dTO.img.width;
-        _beforeImageMask.sizeDelta = new Vector2(810 * ratio, 810);
+        float ratio = (float)dTO.img.height / dTO.img.width;
+        _beforeImageMask.sizeDelta = new Vector2(_beforeImageMask.sizeDelta.x, _beforeImageMask.sizeDelta.x * ratio);
         _beforeImage.texture = dTO.img;
 
         _afterText.SetActive(dTO.done);
         _afterImageMask.gameObject.SetActive(dTO.done);
         if (dTO.done)
         {
-            ratio = dTO.doneImg.height / dTO.doneImg.width;
-            _afterImageMask.sizeDelta = new Vector2(810 * ratio, 810);
+            ratio = (float)dTO.doneImg.height / dTO.doneImg.width;
+            _afterImageMask.sizeDelta = new Vector2(_afterImageMask.sizeDelta.x, _afterImageMask.sizeDelta.x * ratio);
 
             _afterImage.texture = dTO.doneImg;
         }

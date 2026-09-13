@@ -93,7 +93,7 @@ MonoBehaviour:
     - line: '|   use32BitDisplayBuffer: 1'
     - line: '|   preserveFramebufferAlpha: 0'
     - line: '|   disableDepthAndStencilBuffers: 0'
-    - line: '|   androidStartInFullscreen: 1'
+    - line: '|   androidStartInFullscreen: 0'
     - line: '|   androidRenderOutsideSafeArea: 1'
     - line: '|   androidUseSwappy: 1'
     - line: '|   androidDisplayOptions: 1'
@@ -169,7 +169,7 @@ MonoBehaviour:
     - line: '|   loadStoreDebugModeEnabled: 0'
     - line: '|   visionOSBundleVersion: 1.0'
     - line: '|   tvOSBundleVersion: 1.0'
-    - line: '|   bundleVersion: 0.0.1'
+    - line: '|   bundleVersion: 0.0.2'
     - line: '|   preloadedAssets:'
     - line: '|   - {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100,
         type: 3}'
